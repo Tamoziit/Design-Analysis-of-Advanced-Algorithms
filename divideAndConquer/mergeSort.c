@@ -10,28 +10,15 @@ void merge(int *arr, int start, int mid, int end, int *comps)
     // merging the subarrays in sorted order
     for (i = start; i <= end; i++)
     {
+        (*comps)++;
         if (p > mid)
-        {
             arrCpy[k++] = arr[q++];
-            c = 1;
-        }
         else if (q > end)
-        {
             arrCpy[k++] = arr[p++];
-            c = 2;
-        }
         else if (arr[p] < arr[q])
-        {
             arrCpy[k++] = arr[p++];
-            c = 3;
-        }
         else
-        {
             arrCpy[k++] = arr[q++];
-            c = 4;
-        }
-
-        *comps = (*comps) + c;
     }
 
     // copying back the elements
@@ -66,10 +53,31 @@ void display(int *arr, int n)
 
 int main()
 {
-    int arr1[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    int arr2[10] = {10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
-    int arr3[10] = {6, 3, 9, 1, 8, 10, 2, 5, 4, 7};
-    int n = 10, start = 0, end = 9, comps = 0;
+    int arr1[10];
+    int arr2[10];
+    int arr3[10];
+    int n = 10, start = 0, end = 9, comps = 0, i;
+
+    FILE *file = fopen("input.txt", "r");
+    if (file == NULL)
+    {
+        printf("Error in reading input file\n");
+        exit(1);
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        fscanf(file, "%d\n", &arr1[i]);
+    }
+    for (i = 0; i < n; i++)
+    {
+        fscanf(file, "%d\n", &arr2[i]);
+    }
+    for (i = 0; i < n; i++)
+    {
+        fscanf(file, "%d\n", &arr3[i]);
+    }
+    fclose(file);
 
     printf("Before sorting\n");
     printf("Array 1: ");
