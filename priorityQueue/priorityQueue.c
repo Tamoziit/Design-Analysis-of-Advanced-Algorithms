@@ -1,64 +1,55 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void maxHeapify(int *arr, int i, int size)
+void minHeapify(int *arr, int i, int size)
 {
 	int l = 2 * i + 1;
 	int r = 2 * i + 2;
-	int max, t;
+	int min, t;
 
-	if (l < size && arr[l] > arr[i])
-		max = l;
+	if (l < size && arr[l] < arr[i])
+		min = l;
 	else
-		max = i;
+		min = i;
 
-	if (r < size && arr[r] > arr[max])
-		max = r;
+	if (r < size && arr[r] < arr[min])
+		min = r;
 
-	if (max != i)
+	if (min != i)
 	{
 		t = arr[i];
-		arr[i] = arr[max];
-		arr[max] = t;
-		maxHeapify(arr, max, size);
-	}
-}
-
-void buildMaxHeap(int *arr, int size)
-{
-	int i;
-	for (i = size / 2 - 1; i >= 0; i--)
-	{
-		maxHeapify(arr, i, size);
+		arr[i] = arr[min];
+		arr[min] = t;
+		minHeapify(arr, min, size);
 	}
 }
 
 void enqueue(int *arr, int size, int *i, int x)
 {
-    (*i)++;
-    if ((*i) >= size)
-    {
-        printf("Overflow\n");
-        (*i)--; // Prevent out-of-bounds issues
-        return;
-    }
+	(*i)++;
+	if ((*i) >= size)
+	{
+		printf("Overflow\n");
+		(*i)--; // Prevent out-of-bounds issues
+		return;
+	}
 
-    arr[*i] = x; // Insert new element at the end
-    int child = *i;
-    int parent = (child - 1) / 2;
+	arr[*i] = x; // Insert new element at the end
+	int child = *i;
+	int parent = (child - 1) / 2;
 
-    // Corrected while loop to bubble up properly
-    while (child > 0 && arr[parent] < arr[child])
-    {
-        // Swap parent and child
-        int temp = arr[parent];
-        arr[parent] = arr[child];
-        arr[child] = temp;
+	// Bubbling up to restore min-heap property
+	while (child > 0 && arr[parent] > arr[child])
+	{
+		// Swap parent and child
+		int temp = arr[parent];
+		arr[parent] = arr[child];
+		arr[child] = temp;
 
-        // Move up the heap
-        child = parent;
-        parent = (child - 1) / 2;
-    }
+		// Move up the heap
+		child = parent;
+		parent = (child - 1) / 2;
+	}
 }
 
 void dequeue(int *arr, int size, int *i)
@@ -71,16 +62,46 @@ void dequeue(int *arr, int size, int *i)
 	int max = arr[0];
 	arr[0] = arr[(*i)];
 	(*i)--;
-	maxHeapify(arr, 0, (*i) + 1);
+	minHeapify(arr, 0, (*i) + 1);
 
 	printf("Dequeued = %d\n", max);
 }
 
+void heapDecreaseKey(int *arr, int i, int newKey, int heapSize)
+{
+	if (i < 0 || i > heapSize - 1)
+	{
+		printf("Invalid Index\n");
+		return;
+	}
+
+	if (newKey > arr[i])
+	{
+		printf("New key is larger than the current key! Invalid operation.\n");
+		return;
+	}
+
+	arr[i] = newKey; // Setting new key
+
+	// Bubbling up to restore min-heap property
+	int child = i;
+	int parent = (child - 1) / 2;
+	while (child > 0 && arr[parent] > arr[child])
+	{
+		int temp = arr[parent];
+		arr[parent] = arr[child];
+		arr[child] = temp;
+
+		child = parent;
+		parent = (child - 1) / 2;
+	}
+}
+
 void display(int *arr, int i)
 {
-	if(i < 0)
+	if (i < 0)
 		return;
-		
+
 	int j;
 	for (j = 0; j <= i; j++)
 		printf("%d ", arr[j]);
@@ -89,14 +110,14 @@ void display(int *arr, int i)
 
 int main()
 {
-	int i = -1, n, ch, k;
+	int i = -1, n, ch, k, idx;
 	printf("Enter the size\n");
 	scanf("%d", &n);
 	int *arr = (int *)malloc(n * sizeof(int));
 
 	while (1)
 	{
-		printf("Enter\n 1. Enqueue\n 2. Dequeue\n 3. Exit\n");
+		printf("Enter\n 1. Enqueue\n 2. Dequeue\n 3. Heap Decrease key\n 4. Exit\n");
 		scanf("%d", &ch);
 		switch (ch)
 		{
@@ -111,6 +132,12 @@ int main()
 			display(arr, i);
 			break;
 		case 3:
+			printf("Enter index & new value\n");
+			scanf("%d%d", &idx, &k);
+			heapDecreaseKey(arr, idx, k, n);
+			display(arr, i);
+			break;
+		case 4:
 			printf("EOP\n");
 			free(arr);
 			exit(0);

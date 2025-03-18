@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 int comps = 0;
 
@@ -56,6 +57,7 @@ int randomizedSelect(int *arr, int p, int r, int i)
 
 int main()
 {
+    srand(time(NULL));
     int arr[6];
     int n = 6, p = 0, r = n - 1, i, j;
 
