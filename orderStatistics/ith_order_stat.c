@@ -58,19 +58,16 @@ int randomizedSelect(int *arr, int p, int r, int i)
 int main()
 {
     srand(time(NULL));
-    int arr[6];
-    int n = 6, p = 0, r = n - 1, i, j;
+    int n;
+    printf("Enter the size of the array\n");
+    scanf("%d", &n);
+    int *arr = (int *)malloc(n * sizeof(int));
+    int p = 0, r = n - 1, i, j;
 
-    FILE *file = fopen("input.txt", "r");
-    if (file == NULL)
-    {
-        printf("Error in reading input file\n");
-        exit(1);
-    }
-
+    printf("Enter the elements of the array\n");
     for (j = 0; j < n; j++)
     {
-        fscanf(file, "%d\n", &arr[j]);
+        scanf("%d", &arr[j]);
     }
 
     printf("Array = ");
