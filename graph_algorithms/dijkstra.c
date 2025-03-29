@@ -239,7 +239,10 @@ void relax(Graph *graph, int u, int v, Node *queue, int idx)
     for (i = 0; i < graph->numVertices; i++)
     {
         if (v == queue[i].idx)
+        {
             j = i;
+            break;
+        }
     }
 
     if (graph->vertices[v].key > graph->vertices[u].key + wt)
@@ -260,7 +263,7 @@ void dijkstra(Graph *graph, Node *queue, int *idx, int s)
         enqueue(queue, graph->numVertices, idx, graph->vertices[i]);
     }
 
-    printf("Initally the queue:\n");
+    printf("Initially the queue:\n");
     printQueue(queue, (*idx));
 
     while ((*idx) != -1) // Empty
