@@ -1,5 +1,5 @@
 /*
-    Kruskal using UNION-FIND Linked List approach
+    Kruskal using UNION-FIND Path Compressed approach
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,19 +23,13 @@ typedef struct graph
     AdjList *adjList;
 } Graph;
 
-typedef struct UFSet UFSet;
 typedef struct UFNode
 {
     int element;
-    UFSet *set;
+    struct UFNode *set;
+    int rank;
     struct UFNode *next;
 } UFNode;
-
-struct UFSet
-{
-    UFNode *head, *tail;
-    int rank;
-};
 
 typedef struct EdgeRecord
 {
@@ -104,94 +98,49 @@ void readGraphFromFile(Graph *graph, char *fileName)
 }
 
 /* UNION-FIND */
-void printUnionSet(UFSet *set)
+UFNode *makeSet(int x)
 {
-    printf("{ ");
-    for (UFNode *cur = set->head; cur; cur = cur->next)
-    {
-        printf("%d ", cur->element);
-    }
-    printf("} => Rank = %d\n", set->rank);
-}
-
-UFSet *makeSet(int x)
-{
-    UFSet *s = malloc(sizeof(UFSet));
     UFNode *node = malloc(sizeof(UFNode));
 
-    if (!s || !node)
+    if (!node)
     {
         printf("UF allocation error");
         exit(1);
     }
 
     node->element = x;
-    node->next = NULL;
-    node->set = s; // set representative
-    s->head = s->tail = node;
-    s->rank = 0;
-    return s;
+    node->next = node;
+    node->set = node; // set representative
+    node->rank = 0;
+    return node;
 }
 
-UFSet *findSet(UFSet **ufSets, int x)
+UFNode *findSet(UFNode *x)
 {
-    return ufSets[x];
+    if (x->set != x)
+        x->set = findSet(x->set);
+
+    return x->set;
 }
 
-void unionSets(UFSet **ufSets, int x, int y)
+void unionSets(UFNode *x, UFNode *y)
 {
-    UFSet *s1 = findSet(ufSets, x), *s2 = findSet(ufSets, y);
+    UFNode *s1 = findSet(x), *s2 = findSet(y);
     if (s1 == s2)
         return;
 
     if (s1->rank < s2->rank)
     {
-        s2->tail->next = s1->head;
-        s2->tail = s1->tail;
-        for (UFNode *cur = s1->head; cur; cur = cur->next)
-        {
-            cur->set = s2; // path compression
-            ufSets[cur->element] = s2;
-        }
-
-        printf("Set S1:");
-        printUnionSet(s1);
-        printf("Set S2:");
-        printUnionSet(s2);
-        free(s1);
+        s1->set = s2;
     }
     else if (s1->rank > s2->rank)
     {
-        s1->tail->next = s2->head;
-        s1->tail = s2->tail;
-        for (UFNode *cur = s2->head; cur; cur = cur->next)
-        {
-            cur->set = s1;
-            ufSets[cur->element] = s1;
-        }
-
-        printf("Set S1:");
-        printUnionSet(s1);
-        printf("Set S2:");
-        printUnionSet(s2);
-        free(s2);
+        s2->set = s1;
     }
     else
     {
-        s1->tail->next = s2->head;
-        s1->tail = s2->tail;
+        s1->set = s2;
         s1->rank++;
-        for (UFNode *cur = s2->head; cur; cur = cur->next)
-        {
-            cur->set = s1;
-            ufSets[cur->element] = s1;
-        }
-
-        printf("Set S1:");
-        printUnionSet(s1);
-        printf("Set S2:");
-        printUnionSet(s2);
-        free(s2);
     }
 }
 
@@ -278,7 +227,7 @@ EdgeRecord *kruskalMST(Graph *graph, int *mstSize, int *totalWeight)
         exit(1);
     }
 
-    UFSet **ufSets = malloc(n * sizeof(UFSet *));
+    UFNode **ufSets = malloc(n * sizeof(UFNode *));
     if (!ufSets)
     {
         printf("UFSet array alloc error");
@@ -287,6 +236,7 @@ EdgeRecord *kruskalMST(Graph *graph, int *mstSize, int *totalWeight)
 
     for (i = 0; i < n; i++)
         ufSets[i] = makeSet(i); // MAKESET creation
+
     *totalWeight = 0;
     int e = 0, idx = 0;
 
@@ -294,11 +244,13 @@ EdgeRecord *kruskalMST(Graph *graph, int *mstSize, int *totalWeight)
     while (e < n - 1 && idx < edgeCount)
     {
         EdgeRecord curr = edges[idx++];
-        if (findSet(ufSets, curr.src) != findSet(ufSets, curr.dest))
+        printf("Trying to Union %d -- %d, weight = %d\n", curr.src, curr.dest, curr.weight);
+
+        if (findSet(ufSets[curr.src]) != findSet(ufSets[curr.dest]))
         {
             result[e++] = curr;
             *totalWeight += curr.weight;
-            unionSets(ufSets, curr.src, curr.dest); // UNION
+            unionSets(ufSets[curr.src], ufSets[curr.dest]); // UNION
         }
     }
 
@@ -310,7 +262,7 @@ EdgeRecord *kruskalMST(Graph *graph, int *mstSize, int *totalWeight)
 
 void printGraph(Graph *graph)
 {
-    int v, j, wt, p, key, dest;
+    int v, j, wt, dest;
     printf("Vertex\t\t(Destination | Weight)\n");
     for (v = 0; v < graph->numVertices; v++)
     {
