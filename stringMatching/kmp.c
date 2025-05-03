@@ -64,7 +64,7 @@ void KMPMatcher(char *text, char *pattern)
         {
             printf("Pattern occurs with shift = %d\n", i - m + 1);
             flag++;
-            q = pi[q];
+            q = pi[q - 1];
         }
     }
 
