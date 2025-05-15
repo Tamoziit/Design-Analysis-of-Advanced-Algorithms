@@ -29,7 +29,7 @@ int *computePrefix(char *pattern, int *pi)
         if (pattern[k] == pattern[i])
             k++;
 
-        pi[k] = k;
+        pi[i] = k;
     }
 
     printPrefixVector(pattern, pi);
